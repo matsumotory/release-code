@@ -1,0 +1,74 @@
+/*
+// -------------------------------------------------------------------
+// mod_vlimitconn 0.04
+//     Control the number of references from the same IP address to documentroot
+//          or the number of references to vhosts.
+//
+// Original code is "mod_limitipconn.c 0.23"
+//     By David Jao and Niklas Edmundsson
+//     Copyright (C) 2000-2008
+//
+// Fixed, Modified And Added By Matsumoto_r
+// Date     2010/02/04
+// Version  0.04
+//
+// change log
+//  2010/02/04 VlimitConnIP create matsumoto_r 0.01
+//  2010/02/08 VlimitConnVhost create matsumoto_r 0.02
+//  2010/02/15 vlimitconn_logging() create matsumoto_r 0.03
+//  2010/02/16 VLIMITCONN_DEBUG_SYSLOG() create matsumoto_r 0.04
+//
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+// How To Compile
+// [Use DSO]
+// apxs -c mod_vlimitconn.c
+// cp ./.libs/mod_vlimitconn.so /usr/local/apache2/modules
+//
+// <add to  httpd.conf>
+// LoadModule vlimitconn_module modules/mod_vlimitconn.so
+//
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+// How To Use
+//
+//      log file: /tmp/mod_vlimitconn.log
+//       or   #define VLIMITCONN_LOG_FILE            "/tmp/mod_vlimitconn.log"
+//            #define VLIMITCONN_LOG_FLAG_FILE       "/tmp/VLIMITCONN_LOG"
+//            #define VLIMITCONN_DEBUG_FLAG_FILE     "/tmp/VLIMITCONN_DEBUG"
+//
+//      if touch /tmp/VLIMITCONN_LOG, vlimitconn log into /tmp/mod_vlimitconn.log.
+//      if touch /tmp/VLIMITCONN_DEBUG, vlimitconn debug log into syslog.
+//
+//
+// ExtendedStatus On -> for mod_status
+//
+// VlimitConnIP <number of MaxConnectionsPerHost to DocumentRoot> (RealPath of DocumentRoot)
+//
+//  <Directory "/www/hoge/huga/001">
+//       VlimitConnIP 10
+//  </Directory>
+//
+//  or
+//
+//  VlimitConnIP 10 /www/hoge/huga/001
+//
+// or
+//
+//  write /www/hoge/huga/001/.htaccess
+//  VlimitConnIP 10
+//
+//
+// VlimitConnVhost <number of MaxConnectionsPerVhost> (RealPath of DocumentRoot)
+//
+//  VlimitConnVhost 10 /www/hoge/huga/001
+//
+// or
+//
+//  write /www/hoge/huga/001/.htaccess
+//  VlimitConnVhost 10
+// -------------------------------------------------------------------
+*/
+

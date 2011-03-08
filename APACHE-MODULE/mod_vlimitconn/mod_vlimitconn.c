@@ -34,6 +34,15 @@
 // -------------------------------------------------------------------
 // How To Use
 //
+//      log file: /tmp/mod_vlimitconn.log
+//       or   #define VLIMITCONN_LOG_FILE            "/tmp/mod_vlimitconn.log"
+//            #define VLIMITCONN_LOG_FLAG_FILE       "/tmp/VLIMITCONN_LOG"
+//            #define VLIMITCONN_DEBUG_FLAG_FILE     "/tmp/VLIMITCONN_DEBUG"
+//
+//      if touch /tmp/VLIMITCONN_LOG, vlimitconn log into /tmp/mod_vlimitconn.log.
+//      if touch /tmp/VLIMITCONN_DEBUG, vlimitconn debug log into syslog.
+//
+//
 // ExtendedStatus On -> for mod_status
 //
 // VlimitConnIP <number of MaxConnectionsPerHost to DocumentRoot> (RealPath of DocumentRoot)
@@ -83,9 +92,9 @@
 #define SET_VLIMITCONNDEFAULT          0
 #define SET_VLIMITCONNIP               1
 #define SET_VLIMITCONNVHOST            2
-#define VLIMITCONN_LOG_FILE            "/var/log/apache/mod_vlimitconn.log"
-#define VLIMITCONN_LOG_FLAG_FILE       "/var/log/apache/VLIMITCONN_LOG"
-#define VLIMITCONN_DEBUG_FLAG_FILE     "/var/log/apache/VLIMITCONN_DEBUG"
+#define VLIMITCONN_LOG_FILE            "/tmp/mod_vlimitconn.log"
+#define VLIMITCONN_LOG_FLAG_FILE       "/tmp/VLIMITCONN_LOG"
+#define VLIMITCONN_DEBUG_FLAG_FILE     "/tmp/VLIMITCONN_DEBUG"
 
 
 module AP_MODULE_DECLARE_DATA vlimitconn_module;

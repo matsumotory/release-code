@@ -31,6 +31,9 @@
 // -------------------------------------------------------------------
 // [Directive Config]
 //
+//      log file: /tmp/mod_rchecker.log
+//            or #define MOD_RCHECKER_LOG_FILE "/tmp/mod_rchecker.log"
+//
 // - Logging CPUUserTime
 //     RCheckUCPU <threashould> <type>
 //

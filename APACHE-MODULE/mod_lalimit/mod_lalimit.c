@@ -37,6 +37,12 @@
 
 // -------------------------------------------------------------------
 // How To Use
+//
+//      log file: /tmp/mod_lalimit.log
+//            or #define MOD_LOG_FILE       "/tmp/mod_lalimit.log"
+//
+//
+
 // [Server Config]
 //
 // LAlimitEnable <ON|OFF>
