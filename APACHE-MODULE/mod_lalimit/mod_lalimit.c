@@ -68,10 +68,22 @@
 // </FilesMatch>
 //
 // - File Access Control and Output log -
-//      /tmp/mod_lalimit.log
 // <Files "mt.cgi">
 //      LAlimit 0.51 log
 // </Files>
+//
+// - File Access Control Full Path Matching -
+// example: symlinks /var/www/html/cgi/abc.cgi -> /var/www/cgi-bin/abc.cgi
+//          symlinks /var/www/html/cgi/abc.cgi -> /var/www/cgi-bin2/abc.cgi
+//              when access /var/www/cgi-bin/abc.cgi or /var/www/cgi-bin2/abc.cgi
+//                  control the cgi of realpath.
+// <Files "abc.cgi">
+//      LAlimit 10.02 /var/www/html/cgi/abc.cgi
+// </Files>
+// 
+//
+// - Setting .htaccess write /www/hoge/fuga/.htaccess -
+//  LAlimit 10
 //
 // -------------------------------------------------------------------
 
