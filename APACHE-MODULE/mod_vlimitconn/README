@@ -43,6 +43,11 @@
 //      if touch /tmp/VLIMITCONN_DEBUG, vlimitconn debug log into syslog.
 //
 //
+//      - need to load mod_status 
+//          LoadModule status_module modules/mod_status.so
+//          ExtendedStatus On
+//
+//
 // ExtendedStatus On -> for mod_status
 //
 // VlimitConnIP <number of MaxConnectionsPerHost to DocumentRoot> (RealPath of DocumentRoot)
