@@ -1,0 +1,153 @@
+--- mod_ruid2.c.orig	2011-02-24 23:25:28.000000000 +0900
++++ mod_ruid2.c	2011-10-20 18:38:36.000000000 +0900
+@@ -64,6 +64,10 @@
+ #define UNSET			-1
+ #define SET			1
+ 
++#define RU_MAXEXTENSIONS        16
++#define ON                      1
++#define OFF                     0
++
+ 
+ typedef struct
+ {
+@@ -78,13 +82,18 @@
+ 
+ typedef struct
+ {
++    int all_ext_enable;
++    int default_request_per_child;
++    int server_groups_size;
+ 	uid_t default_uid;
+ 	gid_t default_gid;
+ 	uid_t min_uid;
+ 	gid_t min_gid;
++    gid_t *server_groups;
+ 	int8_t stat_used;
+ 	const char *chroot_dir;
+ 	const char *document_root;
++    apr_array_header_t *extensions;
+ } ruid_config_t;
+ 
+ 
+@@ -150,6 +159,9 @@
+ 	conf->stat_used=UNSET;
+ 	conf->chroot_dir=NULL;
+ 	conf->document_root=NULL;
++    conf->extensions=apr_array_make(p, RU_MAXEXTENSIONS, sizeof(char *));
++    conf->all_ext_enable = OFF;
++    conf->default_request_per_child = ap_max_requests_per_child;
+ 
+ 	return conf;
+ }
+@@ -260,6 +272,32 @@
+ 	
+ 	return NULL;
+ }
++
++static const char * set_extensions(cmd_parms *cmd, void *mconfig, const char *arg)
++{
++    ruid_config_t *conf = ap_get_module_config (cmd->server->module_config, &ruid2_module);
++    const char *err = ap_check_cmd_context (cmd, NOT_IN_FILES | NOT_IN_LIMIT);
++
++    if (err != NULL)
++        return err;
++
++    *(const char **)apr_array_push(conf->extensions) = arg;
++
++    return NULL;
++}
++
++static const char * set_all_ext(cmd_parms *cmd, void *mconfig, int flag)
++{
++    ruid_config_t *conf = ap_get_module_config (cmd->server->module_config, &ruid2_module);
++    const char *err = ap_check_cmd_context (cmd, NOT_IN_FILES | NOT_IN_LIMIT);
++
++    if (err != NULL)
++        return err;
++
++    conf->all_ext_enable = flag;
++
++    return NULL;
++}
+                                                                         
+ 
+ /* configure options in httpd.conf */
+@@ -271,6 +309,8 @@
+ 	AP_INIT_TAKE2 ("RDefaultUidGid", set_defuidgid, NULL, RSRC_CONF, "If uid or gid is < than RMinUidGid set[ug]id to this uid gid"),
+ 	AP_INIT_TAKE2 ("RUidGid", set_uidgid, NULL, RSRC_CONF | ACCESS_CONF, "Minimal uid or gid file/dir, else set[ug]id to default (User,Group)"),
+ 	AP_INIT_TAKE2 ("RDocumentChRoot", set_documentchroot, NULL, RSRC_CONF, "Set chroot directory and the document root inside"),
++    AP_INIT_ITERATE("RExtensions", set_extensions, NULL, ACCESS_CONF | RSRC_CONF, "Set Enable Extensions."),
++    AP_INIT_FLAG("RExAll", set_all_ext, NULL, ACCESS_CONF | RSRC_CONF, "Set Enable All Extensions On / Off. (default Off)"),
+ 	{NULL}
+ };
+ 
+@@ -384,7 +424,7 @@
+ 
+ 	cap_t cap;
+ 	cap_value_t capval[3];
+-	
++
+ 	if (cap_mode == RUID_CAP_MODE_KEEP) {
+ 
+ 		cap=cap_get_proc();
+@@ -397,7 +437,9 @@
+ 		}
+ 		cap_free(cap);
+ 
+-		setgroups(0,NULL);
++		//setgroups(0,NULL);
++        ap_log_error (APLOG_MARK, APLOG_ERR, 0, NULL, "** DEBUG ** size=(%d) groups=(%d) file=(%s)", conf->server_groups_size, (int) conf->server_groups[0], r->filename);
++		setgroups(conf->server_groups_size, conf->server_groups);
+ 		setgid(unixd_config.group_id);
+ 		setuid(unixd_config.user_id);
+ 	
+@@ -445,6 +487,31 @@
+ 	cap_t cap;
+ 	cap_value_t capval[4];
+ 
++    const char *extension;
++
++    int enable      = 0;
++    int name_len    = 0;
++
++    if (conf->all_ext_enable) {
++        enable = ON;
++    } else {
++        for (i = 0; i < conf->extensions->nelts; i++) {
++            extension = ((char **)conf->extensions->elts)[i];
++            name_len = strlen(r->filename) - strlen(extension);
++            if (name_len >= 0 && strcmp(&r->filename[name_len], extension) == 0)
++                enable = ON;
++        }
++    }
++
++    if (!enable) {
++        ap_max_requests_per_child = conf->default_request_per_child;
++        cap_mode = RUID_CAP_MODE_KEEP;
++        return DECLINED;
++    } else {
++        ap_max_requests_per_child = 1;
++        cap_mode = RUID_CAP_MODE_DROP;
++    }
++
+ 	cap=cap_get_proc();
+ 	capval[0]=CAP_SETUID;
+ 	capval[1]=CAP_SETGID;
+@@ -541,6 +608,16 @@
+ 	cap_t cap;
+ 	cap_value_t capval[2];
+ 
++    int     gidsize;
++    gid_t   *grouplist;
++
++    gidsize = getgroups(0, NULL);
++    grouplist = apr_pcalloc(r->pool, gidsize * sizeof(gid_t));
++    getgroups(gidsize, grouplist);
++
++    conf->server_groups=grouplist;
++    conf->server_groups_size=gidsize;
++
+ 	if (dconf->ruid_mode==RUID_MODE_STAT) capval[ncap++] = CAP_DAC_READ_SEARCH;
+ 	if (chroot_root != UNSET) capval[ncap++] = CAP_SYS_CHROOT;
+ 	if (ncap) {

@@ -1,0 +1,18 @@
+--- httpd-2.2.14/server/scoreboard.c.orig       2010-02-03 20:29:14.000000000 +0900
++++ httpd-2.2.14/server/scoreboard.c	2010-02-10 18:15:27.000000000 +0900
+@@ -462,8 +462,13 @@
+             apr_cpystrn(ws->client, ap_get_remote_host(c, r->per_dir_config,
+                         REMOTE_NOLOOKUP, NULL), sizeof(ws->client));
+             copy_request(ws->request, sizeof(ws->request), r);
+-            apr_cpystrn(ws->vhost, r->server->server_hostname,
+-                        sizeof(ws->vhost));
++            if (apr_table_get(r->headers_in, "HOST") != NULL) {
++                apr_cpystrn(ws->vhost, apr_table_get(r->headers_in, "HOST"),
++                            sizeof(ws->vhost));
++            } else {
++                apr_cpystrn(ws->vhost, r->server->server_hostname,
++                            sizeof(ws->vhost));
++            }
+         }
+     }
+ 

@@ -1,0 +1,20 @@
+--- httpd-2.2.14/modules/mappers/mod_vhost_alias.c.orig	2010-01-29 16:31:12.000000000 +0900
++++ httpd-2.2.14/modules/mappers/mod_vhost_alias.c	2010-01-29 17:05:20.000000000 +0900
+@@ -41,6 +41,7 @@
+ #define APR_WANT_STRFUNC
+ #include "apr_want.h"
+ 
++#define CORE_PRIVATE
+ #include "httpd.h"
+ #include "http_config.h"
+ #include "http_core.h"
+@@ -378,6 +379,9 @@
+     else {
+         r->filename = apr_pstrcat(r->pool, buf, uri, NULL);
+     }
++    request_rec *top = (r->main)?r->main:r;
++    core_server_config *core = (core_server_config *)ap_get_module_config(r->server->module_config, &core_module);
++    core->ap_document_root = apr_pstrdup(top->pool, buf);
+ }
+ 
+ static int mva_translate(request_rec *r)
