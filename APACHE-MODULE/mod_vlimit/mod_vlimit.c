@@ -327,7 +327,9 @@ static int inc_file_counter(SHM_DATA *limit_stat, request_rec *r) {
     }
 
     if (id >= 0) {
-        limit_stat->file_stat_shm[id].counter++;
+        if (access(r->filename, F_OK) == 0) 
+            limit_stat->file_stat_shm[id].counter++;
+
         return 0;
     }
 
@@ -642,10 +644,10 @@ static int vlimit_check_limit(request_rec *r, vlimit_config *cfg)
     int ip_count    = 0;
     int file_count  = 0;
 
-    if (!ap_is_initial_req(r)) {
-        VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", "SKIPPED: Not initial request", r->pool);
-        return DECLINED;
-    }
+    //if (!ap_is_initial_req(r)) {
+    //    VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", "SKIPPED: Not initial request", r->pool);
+    //    return DECLINED;
+    //}
 
     if (cfg->ip_limit <= 0 && cfg->file_limit <= 0) {
         VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", "SKIPPED: cfg->ip_limit <= 0 && cfg->file_limit <= 0", r->pool);
