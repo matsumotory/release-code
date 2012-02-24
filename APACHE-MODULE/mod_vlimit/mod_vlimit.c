@@ -329,14 +329,14 @@ static int inc_file_counter(SHM_DATA *limit_stat, request_rec *r) {
 
     if (id >= 0) {
         if (lstat(r->filename, &stbuf) == -1) {
-            VLIMIT_DEBUG_SYSLOG("__func__ : ", "not found file or dir.", r->pool);
+            VLIMIT_DEBUG_SYSLOG("inc_file_counter: ", "not found file or dir.", r->pool);
             return -2; //nothin to do
         }
 
         if ((stbuf.st_mode & S_IFMT) == S_IFREG) {
             limit_stat->file_stat_shm[id].counter++;
         } else {
-            VLIMIT_DEBUG_SYSLOG("__func__ : ", "this is not file.", r->pool);
+            VLIMIT_DEBUG_SYSLOG("inc_file_counter: ", "this is not file.", r->pool);
             return -2;
         }
 
@@ -356,13 +356,13 @@ static int dec_file_counter(SHM_DATA *limit_stat, request_rec *r) {
 
     if (id >= 0) {
         if (lstat(r->filename, &stbuf) == -1) {
-            VLIMIT_DEBUG_SYSLOG("__func__ : ", "not found file or dir.", r->pool);
+            VLIMIT_DEBUG_SYSLOG("dec_file_counter: ", "not found file or dir.", r->pool);
             return -2; //nothin to do
         }
         if ((stbuf.st_mode & S_IFMT) == S_IFREG) {
             limit_stat->file_stat_shm[id].counter--;
         } else {
-            VLIMIT_DEBUG_SYSLOG("__func__ : ", "this is not file.", r->pool);
+            VLIMIT_DEBUG_SYSLOG("dec_file_counter: ", "this is not file.", r->pool);
             return -2;
         }
         return 0;
@@ -443,14 +443,14 @@ static int inc_ip_counter(SHM_DATA *limit_stat, request_rec *r) {
 
     if (id >= 0) {
         if (lstat(r->filename, &stbuf) == -1) {
-            VLIMIT_DEBUG_SYSLOG("__func__ : ", "not found file or dir.", r->pool);
+            VLIMIT_DEBUG_SYSLOG("inc_ip_counter: ", "not found file or dir.", r->pool);
             return -2; //nothin to do
         }
 
         if ((stbuf.st_mode & S_IFMT) == S_IFREG) {
             limit_stat->ip_stat_shm[id].counter++;
         } else {
-            VLIMIT_DEBUG_SYSLOG("__func__ : ", "this is not file.", r->pool);
+            VLIMIT_DEBUG_SYSLOG("inc_ip_counter: ", "this is not file.", r->pool);
             return -2;
         }
 
@@ -470,14 +470,14 @@ static int dec_ip_counter(SHM_DATA *limit_stat, request_rec *r) {
 
     if (id >= 0) {
         if (lstat(r->filename, &stbuf) == -1) {
-            VLIMIT_DEBUG_SYSLOG("__func__: ", "not found file or dir.", r->pool);
+            VLIMIT_DEBUG_SYSLOG("dec_ip_counter: ", "not found file or dir.", r->pool);
             return -2; //nothin to do
         }
 
         if ((stbuf.st_mode & S_IFMT) == S_IFREG) {
             limit_stat->ip_stat_shm[id].counter--;
         } else {
-            VLIMIT_DEBUG_SYSLOG("__func__ : ", "this is not file.", r->pool);
+            VLIMIT_DEBUG_SYSLOG("dec_ip_counter: ", "this is not file.", r->pool);
             return -2;
         }
 
