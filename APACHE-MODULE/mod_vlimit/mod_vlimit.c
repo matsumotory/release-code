@@ -201,6 +201,8 @@ static int conf_counter     = 0;
 // grobal mutex 
 apr_global_mutex_t *vlimit_mutex;
 
+// for DirectoryIndex
+static int vlimit_fixup_off = 0;
 
 /* --------------------------------------- */
 /* --- Debug in SYSLOG Logging Routine --- */
@@ -689,10 +691,10 @@ static int vlimit_check_limit(request_rec *r, vlimit_config *cfg)
     int file_count   = 0;
     int counter_stat = 0;
 
-    //if (!ap_is_initial_req(r)) {
-    //    VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", "SKIPPED: Not initial request", r->pool);
-    //    return DECLINED;
-    //}
+    if (vlimit_fixup_off) {
+        VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", "SKIPPED: fixup off on DirectoryIndex", r->pool);
+        return OK;
+    }
 
     if (cfg->ip_limit <= 0 && cfg->file_limit <= 0) {
         VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", "SKIPPED: cfg->ip_limit <= 0 && cfg->file_limit <= 0", r->pool);
@@ -776,6 +778,7 @@ static int vlimit_check_limit(request_rec *r, vlimit_config *cfg)
             , cfg->full_path
         );
         VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", vlimit_debug_log_buf, r->pool);
+        vlimit_fixup_off = 1;
 
         if (counter_stat != -2)
             vlimit_logging("RESULT: 503 INC", r, cfg, limit_stat);
@@ -790,6 +793,7 @@ static int vlimit_check_limit(request_rec *r, vlimit_config *cfg)
             , cfg->full_path
         );
         VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", vlimit_debug_log_buf, r->pool);
+        vlimit_fixup_off = 1;
 
         if (counter_stat != -2)
             vlimit_logging("RESULT: 503 INC", r, cfg, limit_stat);
