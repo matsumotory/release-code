@@ -201,9 +201,6 @@ static int conf_counter     = 0;
 // grobal mutex 
 apr_global_mutex_t *vlimit_mutex;
 
-// for DirectoryIndex
-static int vlimit_fixup_off = 0;
-
 /* --------------------------------------- */
 /* --- Debug in SYSLOG Logging Routine --- */
 /* --------------------------------------- */
@@ -319,7 +316,6 @@ static int get_file_counter(SHM_DATA *limit_stat, request_rec *r) {
 static int inc_file_counter(SHM_DATA *limit_stat, request_rec *r) {
 
     int id;
-    struct stat stbuf;
 
     id = get_file_slot_id(limit_stat, r);
 
@@ -330,18 +326,7 @@ static int inc_file_counter(SHM_DATA *limit_stat, request_rec *r) {
     }
 
     if (id >= 0) {
-        //if (lstat(r->filename, &stbuf) == -1) {
-        //    VLIMIT_DEBUG_SYSLOG("inc_file_counter: ", "not found file or dir.", r->pool);
-        //    return -2; //nothin to do
-        //}
-
-        //if ((stbuf.st_mode & S_IFMT) == S_IFREG) {
-            limit_stat->file_stat_shm[id].counter++;
-        //} else {
-        //    VLIMIT_DEBUG_SYSLOG("inc_file_counter: ", "this is not file.", r->pool);
-        //    return -2;
-        //}
-
+        limit_stat->file_stat_shm[id].counter++;
         return 0;
     }
 
@@ -352,21 +337,11 @@ static int inc_file_counter(SHM_DATA *limit_stat, request_rec *r) {
 static int dec_file_counter(SHM_DATA *limit_stat, request_rec *r) {
 
     int id;
-    struct stat stbuf;
 
     id = get_file_slot_id(limit_stat, r);
 
     if (id >= 0) {
-        //if (lstat(r->filename, &stbuf) == -1) {
-        //    VLIMIT_DEBUG_SYSLOG("dec_file_counter: ", "not found file or dir.", r->pool);
-        //    return -2; //nothin to do
-        //}
-        //if ((stbuf.st_mode & S_IFMT) == S_IFREG) {
-            limit_stat->file_stat_shm[id].counter--;
-        //} else {
-        //    VLIMIT_DEBUG_SYSLOG("dec_file_counter: ", "this is not file.", r->pool);
-        //    return -2;
-        //}
+        limit_stat->file_stat_shm[id].counter--;
         return 0;
     }
 
@@ -433,7 +408,6 @@ static int get_ip_counter(SHM_DATA *limit_stat, request_rec *r) {
 static int inc_ip_counter(SHM_DATA *limit_stat, request_rec *r) {
 
     int id;
-    struct stat stbuf;
 
     id = get_ip_slot_id(limit_stat, r);
 
@@ -444,18 +418,7 @@ static int inc_ip_counter(SHM_DATA *limit_stat, request_rec *r) {
     }
 
     if (id >= 0) {
-        //if (lstat(r->filename, &stbuf) == -1) {
-        //    VLIMIT_DEBUG_SYSLOG("inc_ip_counter: ", "not found file or dir.", r->pool);
-        //    return -2; //nothin to do
-        //}
-
-        //if ((stbuf.st_mode & S_IFMT) == S_IFREG) {
-            limit_stat->ip_stat_shm[id].counter++;
-        //} else {
-        //    VLIMIT_DEBUG_SYSLOG("inc_ip_counter: ", "this is not file.", r->pool);
-        //    return -2;
-        //}
-
+        limit_stat->ip_stat_shm[id].counter++;
         return 0;
     }
 
@@ -466,23 +429,11 @@ static int inc_ip_counter(SHM_DATA *limit_stat, request_rec *r) {
 static int dec_ip_counter(SHM_DATA *limit_stat, request_rec *r) {
 
     int id;
-    struct stat stbuf;
 
     id = get_ip_slot_id(limit_stat, r);
 
     if (id >= 0) {
-        //if (lstat(r->filename, &stbuf) == -1) {
-        //    VLIMIT_DEBUG_SYSLOG("dec_ip_counter: ", "not found file or dir.", r->pool);
-        //    return -2; //nothin to do
-        //}
-
-        //if ((stbuf.st_mode & S_IFMT) == S_IFREG) {
-            limit_stat->ip_stat_shm[id].counter--;
-        //} else {
-        //    VLIMIT_DEBUG_SYSLOG("dec_ip_counter: ", "this is not file.", r->pool);
-        //    return -2;
-        //}
-
+        limit_stat->ip_stat_shm[id].counter--;
         return 0;
     }
 
@@ -691,9 +642,8 @@ static int vlimit_check_limit(request_rec *r, vlimit_config *cfg)
     int file_count   = 0;
     int counter_stat = 0;
 
-    //if (vlimit_fixup_off) {
     if (!ap_is_initial_req(r)) {
-        VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", "SKIPPED: fixup off on DirectoryIndex", r->pool);
+        VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", "SKIPPED: Initial Reqeusts.", r->pool);
         return DECLINED;
     }
 
@@ -779,7 +729,6 @@ static int vlimit_check_limit(request_rec *r, vlimit_config *cfg)
             , cfg->full_path
         );
         VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", vlimit_debug_log_buf, r->pool);
-        vlimit_fixup_off = 1;
 
         if (counter_stat != -2)
             vlimit_logging("RESULT: 503 INC", r, cfg, limit_stat);
@@ -794,7 +743,6 @@ static int vlimit_check_limit(request_rec *r, vlimit_config *cfg)
             , cfg->full_path
         );
         VLIMIT_DEBUG_SYSLOG("vlimit_check_limit: ", vlimit_debug_log_buf, r->pool);
-        vlimit_fixup_off = 1;
 
         if (counter_stat != -2)
             vlimit_logging("RESULT: 503 INC", r, cfg, limit_stat);
@@ -1298,7 +1246,6 @@ static void vlimit_register_hooks(apr_pool_t *p)
 
     ap_hook_post_config(vlimit_init, NULL, NULL, APR_HOOK_MIDDLE);
 //    ap_hook_quick_handler(vlimit_quick_handler, NULL, after_me, APR_HOOK_FIRST);
-    //ap_hook_access_checker(vlimit_handler, NULL, NULL, APR_HOOK_LAST);
     ap_hook_fixups(vlimit_handler, NULL, NULL, APR_HOOK_LAST);
     ap_hook_log_transaction(vlimit_response_end, NULL, NULL, APR_HOOK_MIDDLE);
 }
