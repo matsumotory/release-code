@@ -1,0 +1,46 @@
+--- mod_lua.c.orig      2011-12-19 03:02:21.000000000 +0900
++++ mod_lua.c   2012-03-28 13:56:08.000000000 +0900
+@@ -618,6 +618,10 @@
+ {
+     /* ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, "LuaHookInsertFilter not yet implemented"); */
+ }
++static int lua_log_transaction_harness(request_rec *r)
++{
++    return lua_request_rec_hook_harness(r, "log_transaction", APR_HOOK_MIDDLE);
++}
+ 
+ static int lua_quick_harness(request_rec *r, int lookup)
+ {
+@@ -957,6 +961,14 @@
+     return lua_ssl_is_https ? lua_ssl_is_https(c) : 0;
+ }
+ 
++static const char *register_log_transaction_hook(cmd_parms *cmd, void *_cfg,
++                                               const char *file,
++                                               const char *function)
++{
++    return register_named_file_function_hook("log_transaction", cmd, _cfg, file,
++                                             function, APR_HOOK_MIDDLE);
++}
++
+ /*******************************/
+ 
+ command_rec lua_commands[] = {
+@@ -1049,6 +1061,9 @@
+     AP_INIT_RAW_ARGS("Lua_____ByteCodeHack", hack_section_handler, NULL,
+                      OR_ALL,
+                      "(internal) Byte code handler"),
++    AP_INIT_TAKE2("LuaLogTransaction", register_log_transaction_hook, NULL,
++                  OR_ALL,
++                  "Provide a hook for the log_transaction phase of request processing"),
+     {NULL}
+ };
+ 
+@@ -1197,6 +1212,8 @@
+ 
+     ap_hook_post_config(lua_post_config, NULL, NULL, APR_HOOK_MIDDLE);
+ 
++    ap_hook_log_transaction(lua_log_transaction_harness, NULL, NULL, APR_HOOK_MIDDLE);
++
+     APR_OPTIONAL_HOOK(ap_lua, lua_open, lua_open_hook, NULL, NULL,
+                       APR_HOOK_REALLY_FIRST);
