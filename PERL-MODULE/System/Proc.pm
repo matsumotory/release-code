@@ -29,6 +29,7 @@ sub new {
         error               =>  (exists $args{error})            ? $args{error}             :   0,
         irc_owner           =>  (exists $args{irc_owner})        ? $args{irc_owner}         :   'System',
         irc_channel         =>  (exists $args{irc_channel})      ? $args{irc_channel}       :   '#TEST:*.jp',
+        irc_server          =>  (exists $args{irc_server})       ? $args{irc_server}        :   '256.256.256.256',
         log_file            =>  (exists $args{log_file})         ? $args{log_file}          :   "/tmp/operation_tool-$ENV{USER}.log",
         tool_name           =>  (exists $args{tool_name})        ? $args{tool_name}         :   'operation_tool',
         syslog_type         =>  (exists $args{syslog_type})      ? $args{syslog_type}       :   'operation',
