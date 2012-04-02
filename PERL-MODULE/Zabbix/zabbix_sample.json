@@ -1,0 +1,29 @@
+{
+    "object":"host",
+    "method":"create",
+    "params":{
+        "host":"__HOST_NAME__",
+        "ip":"__HOST_IPADDRESS__",
+        "port":10050,
+        "useip":1,
+        "proxy_hostid":10047,
+        "groups":[
+                        {"groupid":__GROUP_ID1_},
+                        {"groupid":__GROUP_ID2_}
+                  ],
+        "status":0,
+        "templates":[
+                            {"templateid":__TEMPLATE_ID1_},
+                            {"templateid":__TEMPLATE_ID2_}
+                    ],
+        "macros":[
+                        {"macro":"{$HOST_URL}", "value":"__HOST_IPADDRESS__"}
+                  ],
+        "profile":{
+                        "devicetype":"AAA デバイス",
+                        "tag":"なんちゃらサービス",
+                        "hardware":"なんちゃらハード",
+                        "location":"なんちゃらデータセンターの何チャララック"
+                  }
+    }
+}
