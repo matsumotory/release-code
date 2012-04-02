@@ -50,7 +50,6 @@ sub new {
         error               =>  (exists $args{error})            ? $args{error}             :   0,
         irc_owner           =>  (exists $args{irc_owner})        ? $args{irc_owner}         :   'ZabbixSystem',
         irc_channel         =>  (exists $args{irc_channel})      ? $args{irc_channel}       :   '#TEST:*.jp',
-        irc_script          =>  (exists $args{irc_script})       ? $args{irc_script}        :   './bin/irc-write.pl',
         irc_server          =>  (exists $args{irc_server})       ? $args{irc_server}        :   '256.256.256.256',
         log_file            =>  (exists $args{log_file})         ? $args{log_file}          :   "/tmp/tool-$ENV{USER}.log",
         tool_name           =>  (exists $args{tool_name})        ? $args{tool_name}         :   'Zabbix_tool',
