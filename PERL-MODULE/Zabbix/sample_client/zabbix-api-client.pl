@@ -18,7 +18,7 @@
 
 use strict;
 use warnings;
-use lib "/usr/local/lib/zabbix_lib";
+use lib "/usr/local/lib/myperl_lib";
 use Zabbix::API::Client;
 use Data::Dump qw(dump);
 use File::Spec;
