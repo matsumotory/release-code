@@ -2,9 +2,9 @@
 #############################################################################################
 #
 #   Linux QoS Setting Tool
-#       Copyright (C) 2010 MATSUMOTO, Ryosuke
+#       Copyright (C) 2012 MATSUMOTO, Ryosuke
 #
-#   This Code was written by matsumoto_r                 in 2010/09/01 -
+#   This Code was written by matsumoto_r                 in 2012/04/08 -
 #
 #   Usage:
 #       /usr/local/sbin/qos-control.pl
@@ -13,13 +13,13 @@
 #
 # Change Log
 #
-# 2010/09/01 matsumoto_r first release
+# 2012/04/08 matsumoto_r first release
 #
 #############################################################################################
 
 use strict;
 use warnings;
-use lib "/usr/local/lib/matsumoto_r_lib";
+use lib "/usr/local/lib/myperl_lib";
 use System::Base;
 use File::Spec;
 use File::Basename;
