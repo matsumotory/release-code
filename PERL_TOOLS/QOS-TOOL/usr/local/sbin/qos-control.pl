@@ -27,7 +27,7 @@ use Getopt::Long;
 
 $| = 1;
 
-our $VERSION    = '0.01';
+our $VERSION    = '1.01';
 our $SCRIPT     = basename($0);
 
 our $QOS_INIT     = File::Spec->catfile("/etc", "rc.d", "init.d", "qos.init");
@@ -237,7 +237,7 @@ sub view {
             #print $config_file . "\n";
             next if !-f $config_file;
             my @config = $SYSTEM->file_read($config_file);
-            print "CLSID->$clsid\t";
+            $output .= "CLSID->$clsid\t";
             my %VIEW_LIST = ();
             grep    {
                         my ($key, $value) = split /=/, $_;
@@ -328,7 +328,7 @@ sub help {
         -v, --version       display version and exit
 
 USAGE
-    $SYSTEM->error_record("$msg") if $msg;
+    $SYSTEM->error_record("$msg") if defined $msg && $msg ne "help";
     exit 1;
 }
 
