@@ -30,9 +30,8 @@ $| = 1;
 our $VERSION    = '0.01';
 our $SCRIPT     = basename($0);
 
-our $QOS_INIT   = File::Spec->catfile("/etc", "rc.d", "init.d", "qos.init");
-our $QOS_MODULE = File::Spec->catfile("/usr", "local", "sbin", "qos.sh");
-
+our $QOS_INIT     = File::Spec->catfile("/etc", "rc.d", "init.d", "qos.init");
+our $QOS_MODULE   = File::Spec->catfile("/usr", "local", "sbin", "qos.sh");
 our $QOS_CONF_DIR = File::Spec->catfile("/etc", "sysconfig", "qos");
 
 our $DIRECTION_LIST = {
@@ -126,6 +125,19 @@ our $METHOD_LIST = {
 my ($server_ip, $client_ip, $server_port, $method, $protocol, $interface, $traffic, $direction);
 our $TARGET_CLSID;
 
+our $SYSTEM      = System::Base->new(
+   debug           =>  0,
+   info            =>  0,
+   warn            =>  0,
+   error           =>  1,
+   irc_owner       =>  $SCRIPT,
+   tool_name       =>  $SCRIPT,
+   log_file        =>  "/tmp/$SCRIPT.log",
+   pid_file        =>  "/tmp/$SCRIPT.pid",
+   lock_file       =>  "/tmp/$SCRIPT.lock",
+   syslog_type     =>  $SCRIPT,
+);
+
 GetOptions(
 
     "--method|m=s"      =>  \$method,
@@ -138,20 +150,6 @@ GetOptions(
     "--clsid|c=s"       =>  \$TARGET_CLSID,
     "--help"            =>  \&help,
     "--version"         =>  \&version,
-);
-
-
-our $SYSTEM      = System::Base->new(
-   debug           =>  0,
-   info            =>  0,
-   warn            =>  0,
-   error           =>  1,
-   irc_owner       =>  $SCRIPT,
-   tool_name       =>  $SCRIPT,
-   log_file        =>  "/tmp/$SCRIPT.log",
-   pid_file        =>  "/tmp/$SCRIPT.pid",
-   lock_file       =>  "/tmp/$SCRIPT.lock",
-   syslog_type     =>  $SCRIPT,
 );
 
 $SIG{INT}  = sub { $SYSTEM->TASK_SIGINT };
@@ -176,7 +174,7 @@ $SYSTEM->make_pid_file;
 $client_ip    = (defined $client_ip)        ?   $client_ip          :   "";
 $protocol     = (defined $protocol)         ?   $protocol           :   "all";
 $interface    = (defined $interface)        ?   $interface          :   "eth0";
-#$server_ip    = (defined $server_ip)        ?   $server_ip          :   $SYSTEM->my_ip($interface);
+$server_ip    = (defined $server_ip)        ?   $server_ip          :   $SYSTEM->my_ip($interface);
 $server_port  = ($protocol eq "all")        ?   ""                  :   ":$PROTOCOL_LIST->{$protocol}->{port}";
 $TARGET_CLSID = (defined $TARGET_CLSID)     ?   $TARGET_CLSID       :   "0000";
 
@@ -330,7 +328,7 @@ sub help {
         -v, --version       display version and exit
 
 USAGE
-    $SYSTEM->error_record("$msg") if defined $msg;
+    $SYSTEM->error_record("$msg") if $msg;
     exit 1;
 }
 
