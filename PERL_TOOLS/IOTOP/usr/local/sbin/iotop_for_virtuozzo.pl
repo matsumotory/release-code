@@ -1,7 +1,7 @@
 #!/usr//bin/perl
 #############################################################################################
 #
-#   Process I/O Statistics Investigating Tool
+#   Process I/O Statistics Investigating Tool for Plesk on Virtuozzo
 #       Copyright (C) 2012 MATSUMOTO, Ryosuke
 #
 #   This Code was written by matsumoto_r                 in 2012/04/15 -
