@@ -14,7 +14,7 @@
 # Change Log
 #
 # 2012/04/10 matsumoto_r first release 0.01
-# 2012/04/15 matsumoto_r System::Proc::Stat Class create 0.02
+# 2012/04/15 matsumoto_r System::Proc::Stat Class create 1.00
 #
 #############################################################################################
 
@@ -27,7 +27,7 @@ use File::Basename;
 use bigint;
 use Getopt::Long;
 
-our $VERSION    = '0.02';
+our $VERSION    = '1.00';
 our $SCRIPT     = basename($0);
 
 $| = 1;
