@@ -1,20 +1,20 @@
 #!/usr//bin/perl
 #############################################################################################
 #
-#   Process I/O Statistics Investigating Tool
+#   Process I/O Statistics Investigating Tool for Plesk on Virtuozzo
 #       Copyright (C) 2012 MATSUMOTO, Ryosuke
 #
 #   This Code was written by matsumoto_r                 in 2012/04/15 -
 #
 #   Usage:
-#       /usr/local/sbin/iotop.pl
+#       /usr/local/sbin/piotop_for_virtuozzo.pl
 #
 #############################################################################################
 #
 # Change Log
 #
 # 2012/04/10 matsumoto_r first release 0.01
-# 2012/04/15 matsumoto_r System::Proc::Stat Class create 1.00
+# 2012/04/15 matsumoto_r System::Proc::Stat Class create 0.02
 #
 #############################################################################################
 
@@ -27,7 +27,7 @@ use File::Basename;
 use bigint;
 use Getopt::Long;
 
-our $VERSION    = '1.00';
+our $VERSION    = '0.02';
 our $SCRIPT     = basename($0);
 
 $| = 1;
@@ -65,12 +65,14 @@ our $PROC = System::Proc->new(
    syslog_type     =>  $SCRIPT,
 );
 
-our $PHEADER = sprintf("%s %-5s %-16s %-12s %-12s %-16s %-20s%s", 
+our $PHEADER = sprintf("%s %-5s %-16s %-12s %-12s %-10s %-30s %-16s %-20s%s", 
                     "\e[1m",
                     "pid", 
                     "state", 
                     "read", 
                     "write", 
+                    "ctid",
+                    "domain",
                     "command",
                     "cwd_path",
                     "\n\e[0m");
@@ -122,9 +124,10 @@ sub get_current_proc_info {
 	    my $cmd_data = $PROC->get_cmdname_by_pid($pid);
 	    my $exe_path = $PROC->get_exe_by_pid($pid);
 	    my $cwd_path = $PROC->get_cwd_by_pid($pid);
+        my $domain   = $PROC->get_domain($cwd_path);
 
         $cmd_data->{envID} = "nothing" if !defined $cmd_data->{envID} || $cmd_data->{envID} !~ /^\d+$/;
-	    $current_data{$pid} = "$cmd_data->{Name}\0$cmd_data->{State}\0$io_data->{read_bytes}\0$io_data->{write_bytes}\0_exe_path\0$cmd_data->{envID}\0$cwd_path";
+	    $current_data{$pid} = "$cmd_data->{Name}\0$cmd_data->{State}\0$io_data->{read_bytes}\0$io_data->{write_bytes}\0_exe_path\0$cmd_data->{envID}\0$cwd_path\0$domain";
     }
 
     return \%current_data;
@@ -158,6 +161,7 @@ sub print_proc {
 	        $datalist{$pid}[4] = $cur_datalist{$pid}[4];
 	        $datalist{$pid}[5] = ($cur_datalist{$pid}[5] =~ /^\d+$/) ?   $cur_datalist{$pid}[5] :   "nothing";
 	        $datalist{$pid}[6] = $cur_datalist{$pid}[6];
+	        $datalist{$pid}[7] = $cur_datalist{$pid}[7];
 	    }
     }
 
@@ -176,15 +180,20 @@ sub print_proc {
         my $state       = $datalist{$pid}[1];
         my $read        = $datalist{$pid}[2];
         my $write       = $datalist{$pid}[3];
+        my $ctid        = $datalist{$pid}[5];
+        my $domain      = $datalist{$pid}[7];
         my $command     = $datalist{$pid}[0];
         my $cwd_path    = $datalist{$pid}[6];
 
-	    printf("%s %-5d %-16s %-12s %-12s %-16s %-20s%s\n", 
+        $color_head = "\e[31m" if $domain ne "nothing" && $ctid ne "nothing";
+	    printf("%s %-5d %-16s %-12s %-12s %-10s %-30s %-16s %-20s%s\n", 
             $color_head,
             $pid, 
             $state, 
             $PROC->byte_to_bps($read, $interval), 
             $PROC->byte_to_bps($write, $interval), 
+            $ctid,
+            $domain,
             $command,
             $cwd_path,
             $color_tail) if $showzero == 0 || $read != 0 || $write != 0;
